@@ -1,11 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useMutation } from "@apollo/client";
-import {
-  CREATE_EARTHQUAKE,
-  UPDATE_EARTHQUAKE,
-} from "../../graphql/earthquakes";
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -16,12 +11,8 @@ import {
   IconButton,
 } from "@mui/material";
 import { Edit } from "@mui/icons-material";
-import {
-  Earthquake,
-  CreateEarthquakeInput,
-  UpdateEarthquakeInput,
-} from "../../types";
-import { formatDateForInput } from "@/utils/formatDate";
+import { Earthquake } from "../../types";
+import { useEarthquakeForm } from "@/hooks";
 
 interface Props {
   earthquake?: Earthquake;
@@ -29,60 +20,18 @@ interface Props {
 }
 
 const EarthquakeForm: React.FC<Props> = ({ earthquake, onCompleted }) => {
-  const isEditMode = Boolean(earthquake);
-  const [open, setOpen] = useState(false);
-  const [location, setLocation] = useState(earthquake?.location || "");
-  const [magnitude, setMagnitude] = useState<number>(
-    earthquake?.magnitude || 0
-  );
-  const [date, setDate] = useState<string>(
-    earthquake ? formatDateForInput(new Date(earthquake.date)) : ""
-  );
-
-  const [createEarthquake] = useMutation(CREATE_EARTHQUAKE);
-  const [updateEarthquake] = useMutation(UPDATE_EARTHQUAKE);
-
-  useEffect(() => {
-    if (earthquake) {
-      setLocation(earthquake.location);
-      setMagnitude(earthquake.magnitude);
-      setDate(formatDateForInput(new Date(earthquake.date)));
-    } else {
-      setLocation("");
-      setMagnitude(0);
-      setDate(formatDateForInput(new Date()));
-    }
-  }, [earthquake, isEditMode, open]);
-
-  const handleSubmit = async () => {
-    if (!date) {
-      alert("Please select a valid date and time.");
-      return;
-    }
-
-    const isoDate = new Date(date).toISOString();
-
-    const input: CreateEarthquakeInput | UpdateEarthquakeInput = {
-      location,
-      magnitude,
-      date: isoDate,
-    };
-
-    try {
-      if (isEditMode && earthquake) {
-        await updateEarthquake({
-          variables: { id: earthquake.id, input },
-        });
-      } else {
-        await createEarthquake({ variables: { input } });
-      }
-      setOpen(false);
-      onCompleted();
-    } catch (err) {
-      console.error(err);
-      alert("Operation failed.");
-    }
-  };
+  const {
+    location,
+    setLocation,
+    magnitude,
+    setMagnitude,
+    date,
+    setDate,
+    handleSubmit,
+    isEditMode,
+    open,
+    setOpen,
+  } = useEarthquakeForm({ earthquake, onCompleted });
 
   return (
     <>

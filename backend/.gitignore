@@ -1,0 +1,23 @@
+!.commitlintrc.js
+!.editorconfig.js
+!.eslintrc.js.js
+!.npmrc.js
+!.prettierignore
+!.prettierrc.json
+### macOS template
+# General
+.DS_Store
+
+### Local
+.env
+/.idea/
+/coverage/
+/dist/
+/.nyc_output/
+/test-reports/
+node_modules
+.eslintcache
+!/bin/
+report.*.json
+/.vscode
+/logs

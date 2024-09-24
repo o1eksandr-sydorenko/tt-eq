@@ -46,21 +46,33 @@ export const useEarthquakeForm = ({
       return;
     }
 
-    const isoDate = new Date(date).toISOString();
     const input: CreateEarthquakeInput | UpdateEarthquakeInput = {
       location,
       magnitude,
-      date: isoDate,
+      date: new Date(date).toISOString(),
     };
 
     try {
       if (isEditMode && earthquake) {
-        await updateEarthquake({ id: earthquake.id, input });
+        const hasChanges =
+          earthquake.location !== location ||
+          earthquake.magnitude !== magnitude ||
+          formatDateForInput(new Date(earthquake.date)) !== date;
+
+        if (hasChanges) {
+          await updateEarthquake({ id: earthquake.id, input });
+          onCompleted();
+        }
       } else {
+        if (!location || !magnitude || !date) {
+          alert("All fields are required");
+          return;
+        }
+
         await createEarthquake({ input: input as CreateEarthquakeInput });
+        onCompleted();
       }
       setOpen(false);
-      onCompleted();
     } catch (err) {
       console.error(err);
       alert("Operation failed.");
